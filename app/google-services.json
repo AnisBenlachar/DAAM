@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "226417206955",
+    "project_id": "daam1-a5409",
+    "storage_bucket": "daam1-a5409.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:226417206955:android:2b801a6db9f9a27787b9ee",
+        "android_client_info": {
+          "package_name": "com.example.daam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCC_EMh59Bt8QWtX3DArHYKP8kvAiwQGTc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#B0D1CC"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
+
+        <!-- App Logo -->
+        <ImageView
+            android:layout_width="368dp"
+            android:layout_height="246dp"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/logo3" />
+
+        <!-- Email Input -->
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:background="@android:drawable/edit_text"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@android:color/white"
+            android:radius="8dp" />
+
+        <!-- Password Input -->
+        <EditText
+            android:id="@+id/editTextPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:background="@android:drawable/edit_text"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Forgot Password Text -->
+        <TextView
+            android:id="@+id/textForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forgot password?"
+            android:textColor="#008080"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+
+        <!-- Login Button -->
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Log In"
+            android:backgroundTint="#008080"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Sign Up Text -->
+        <TextView
+            android:id="@+id/textSignUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Don’t have an account? Sign up"
+            android:textColor="#008080"
+            android:textSize="16sp"
+            android:layout_marginBottom="32dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#CCCCCC"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Social Login Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Google Button with logo -->
+            <Button
+                android:id="@+id/buttonGoogle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Continue with Google"
+                android:backgroundTint="#DB4437"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="12dp"
+                android:drawableStart="@drawable/google_logo"
+                android:drawablePadding="30dp"
+                android:paddingStart="30dp"
+                android:gravity="center_vertical" />
+
+            <!-- Facebook Button with logo -->
+            <Button
+                android:id="@+id/buttonFacebook"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Continue with Facebook"
+                android:backgroundTint="#1877F2"
+                android:textColor="@android:color/white"
+                android:drawableStart="@drawable/facebook_logo"
+                android:drawablePadding="30dp"
+                android:paddingStart="30dp"
+                android:gravity="center_vertical" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
