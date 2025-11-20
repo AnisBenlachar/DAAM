@@ -12,13 +12,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DAAM">
         <activity
+            android:name=".activity_stores"
+            android:exported="false" />
+        <activity
+            android:name=".nav_drawer_menu"
+            android:exported="false" />
+        <activity
+            android:name=".nav_header_drawer"
+            android:exported="false" />
+        <activity
+            android:name=".nav_header"
+            android:exported="false" />
+        <activity
+            android:name=".dialog_product_details"
+            android:exported="false" />
+        <activity
+            android:name=".activity_product_detail"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
             android:name=".ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activity_forgot_password"
             android:exported="false" />
         <activity
             android:name=".SignUpActivity"

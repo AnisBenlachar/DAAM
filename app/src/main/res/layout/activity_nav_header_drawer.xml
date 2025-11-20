@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:background="#008080"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center_vertical">
+
+    <!-- Profile Picture -->
+    <ImageView
+        android:id="@+id/profile_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/profile_icon"
+        android:background="@drawable/rounded_input"
+        android:contentDescription="User profile picture"
+        android:scaleType="centerCrop"/>
+
+    <!-- User Name -->
+    <TextView
+        android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Jane Smith"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"/>
+
+    <!-- User Email -->
+    <TextView
+        android:id="@+id/user_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="jane.smith@email.com"
+        android:textColor="#FFFFFF"
+        android:alpha="0.8"
+        android:textSize="13sp"
+        android:layout_marginTop="4dp"/>
+
+</LinearLayout>
