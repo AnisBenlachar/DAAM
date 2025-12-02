@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ✅ LOCATION PERMISSIONS -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,6 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DAAM">
+
         <activity
             android:name=".activity_stores"
             android:exported="false" />
@@ -37,23 +42,29 @@
             android:exported="false" />
         <activity
             android:name=".SignUpActivity"
-            android:exported="false" /> <!-- Splash screen launches first -->
+            android:exported="false" />
+
+        <!-- Splash screen launches first -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Login screen after splash -->
+        </activity>
+
+        <!-- Login screen -->
         <activity
             android:name=".LoginActivity"
-            android:exported="false" /> <!-- Main screen (after login success) -->
+            android:exported="false" />
+
+        <!-- Main screen -->
         <activity
             android:name=".MainActivity"
             android:exported="true" />
+
     </application>
 
 </manifest>

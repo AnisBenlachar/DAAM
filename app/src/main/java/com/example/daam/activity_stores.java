@@ -1,5 +1,6 @@
 package com.example.daam;
 
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,11 +24,32 @@ import androidx.appcompat.app.ActionBar;
 
 import com.google.android.material.navigation.NavigationView;
 
+import org.osmdroid.config.Configuration;
+import org.osmdroid.views.MapView;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Marker;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import android.location.Location;
+
+
+
 public class activity_stores extends AppCompatActivity {
     // UI Elements
     private Button btnMap, btnProducts;
+    // ✅ Location Card UI
+    private CardView cardLocation;
+    private TextView txtLatitude, txtLongitude;
+    private ImageView btnCloseLocation;
+
+
+
     private FrameLayout mapLayout;
     private ScrollView productsLayout;
+    private MapView mapView;
 
     // Product data class (same as HomeActivity)
     public static class Product {
@@ -50,9 +72,51 @@ public class activity_stores extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stores);
+        setContentView(R.layout.activity_stores);
+        // ✅ Initialize Location Card Views
+        cardLocation = findViewById(R.id.cardLocation);
+        txtLatitude = findViewById(R.id.txtLatitude);
+        txtLongitude = findViewById(R.id.txtLongitude);
+        btnCloseLocation = findViewById(R.id.btnCloseLocation);
+
+// ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
+
+// ✅ Close button logic
+        btnCloseLocation.setOnClickListener(v -> cardLocation.setVisibility(View.GONE));
+
+
+        // ✅ Initialize Location Card Views
+        cardLocation = findViewById(R.id.cardLocation);
+        txtLatitude = findViewById(R.id.txtLatitude);
+        txtLongitude = findViewById(R.id.txtLongitude);
+        btnCloseLocation = findViewById(R.id.btnCloseLocation);
+
+// ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
+
+// ✅ Close button logic
+        btnCloseLocation.setOnClickListener(v -> cardLocation.setVisibility(View.GONE));
+
+
+        // Set user agent value, required for OSM
+        Configuration.getInstance().setUserAgentValue(getApplicationContext().getPackageName());
 
         // Initialize views
         initializeViews();
+
+        mapView = findViewById(R.id.mapView);
+        mapView.setBuiltInZoomControls(true);
+        mapView.setMultiTouchControls(true);
+
+        // Set default zoom and center
+        mapView.getController().setZoom(15.0);
+        GeoPoint startPoint = new GeoPoint(48.8583, 2.2944); // Example: Eiffel Tower
+        mapView.getController().setCenter(startPoint);
+
+        // Add a marker
+        Marker marker = new Marker(mapView);
+        marker.setPosition(startPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        mapView.getOverlays().add(marker);
 
         // Setup toggle buttons
         setupToggleButtons();
@@ -80,6 +144,18 @@ public class activity_stores extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume(); // Needed for compass, my location overlays, v6.0.0 and up
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();  // Needed for compass, my location overlays, v6.0.0 and up
+    }
+
     private void initializeViews() {
         btnMap = findViewById(R.id.btnMap);
         btnProducts = findViewById(R.id.btnProducts);
@@ -104,6 +180,9 @@ public class activity_stores extends AppCompatActivity {
         mapLayout.setVisibility(View.VISIBLE);
         productsLayout.setVisibility(View.GONE);
 
+        // ✅ SHOW LOCATION CARD AGAIN WHEN MAP OPENS
+        cardLocation.setVisibility(View.VISIBLE);
+
         // Update button styles
         btnMap.setBackgroundResource(R.drawable.toggle_button_selected);
         btnMap.setTextColor(ContextCompat.getColor(this, android.R.color.white));
@@ -111,6 +190,7 @@ public class activity_stores extends AppCompatActivity {
         btnProducts.setBackgroundResource(R.drawable.toggle_button_unselected);
         btnProducts.setTextColor(ContextCompat.getColor(this, R.color.gray_text));
     }
+
 
     private void showProductsSection() {
         // Show products, hide map

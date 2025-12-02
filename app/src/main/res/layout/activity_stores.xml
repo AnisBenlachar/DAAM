@@ -112,6 +112,65 @@
                 android:layout_height="match_parent"
                 android:background="#E8F5E9">
 
+                <org.osmdroid.views.MapView
+                    android:id="@+id/mapView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+                <!-- ✅ LOCATION INFO CARD -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:layout_gravity="top"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="10dp"
+                    android:backgroundTint="@android:color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/txtLatitude"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Latitude: --"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="#212121"/>
+
+                            <TextView
+                                android:id="@+id/txtLongitude"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Longitude: --"
+                                android:textSize="15sp"
+                                android:textColor="#212121"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <!-- ❌ CLOSE BUTTON -->
+                        <ImageView
+                            android:id="@+id/btnCloseLocation"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@android:drawable/ic_delete"
+                            android:contentDescription="Close"
+                            app:tint="#F44336" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -119,7 +178,7 @@
                     android:gravity="center"
                     android:padding="32dp">
 
-                    <ImageView
+                    <!-- <ImageView
                         android:layout_width="120dp"
                         android:layout_height="120dp"
                         android:src="@android:drawable/ic_dialog_map"
@@ -141,7 +200,7 @@
                         android:text="Store locations will appear here"
                         android:textSize="16sp"
                         android:textColor="#616161"
-                        android:layout_marginTop="8dp"/>
+                        android:layout_marginTop="8dp"/> -->
                 </LinearLayout>
             </FrameLayout>
 
