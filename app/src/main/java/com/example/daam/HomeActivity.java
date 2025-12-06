@@ -38,11 +38,11 @@ public class HomeActivity extends AppCompatActivity {
     // ============================================
     // This class holds information about each product
     public static class Product {
-        public int imageResource;      // Image drawable ID
-        public String name;             // Product name
-        public String price;            // Product price
-        public String desc;             // Product description
-        public String badge;            // Badge text (NEW, HOT, etc.) or null
+        public int imageResource; // Image drawable ID
+        public String name; // Product name
+        public String price; // Product price
+        public String desc; // Product description
+        public String badge; // Badge text (NEW, HOT, etc.) or null
 
         public Product(int imageResource, String name, String price, String desc, String badge) {
             this.imageResource = imageResource;
@@ -91,8 +91,7 @@ public class HomeActivity extends AppCompatActivity {
                 this,
                 drawerLayout,
                 R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close
-        );
+                R.string.navigation_drawer_close);
 
         // Add the toggle to the drawer
         drawerLayout.addDrawerListener(toggle);
@@ -125,6 +124,10 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(HomeActivity.this, "Stores selected", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(HomeActivity.this, activity_stores.class);
                 startActivity(intent);
+            } else if (id == R.id.nav_map) {
+                Toast.makeText(HomeActivity.this, "Map selected", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(HomeActivity.this, MapActivity.class);
+                startActivity(intent);
             }
 
             // Close the drawer
@@ -132,6 +135,7 @@ public class HomeActivity extends AppCompatActivity {
             return true;
         });
     }
+
     private void setupMenuIconListener() {
         ImageView menuIcon = findViewById(R.id.ivMenuIcon);
         if (menuIcon != null) {
@@ -151,23 +155,21 @@ public class HomeActivity extends AppCompatActivity {
                 "Solar Panel Kit",
                 "$2,499",
                 "High efficiency solar panel kit with advanced monocrystalline technology. Perfect for residential installations with maximum energy production capacity. Includes mounting hardware and 25-year warranty.",
-                "NEW"
-        );
+                "NEW");
 
         Product product2 = new Product(
                 R.drawable.solar_roof,
                 "Inverter System",
                 "$1,299",
                 "Professional grade 3000W inverter system with smart monitoring capabilities. Converts DC to AC power efficiently with built-in surge protection and real-time performance tracking.",
-                "-20%"
-        );
+                "-20%");
 
         Product product3 = new Product(
                 R.drawable.solar_roof,
                 "Battery Storage",
                 "$3,999",
                 "Advanced 10kWh lithium-ion battery storage system. Store excess solar energy for nighttime use. Includes smart management system and 10-year warranty.",
-                null  // No badge
+                null // No badge
         );
 
         Product product4 = new Product(
@@ -175,8 +177,7 @@ public class HomeActivity extends AppCompatActivity {
                 "Monitoring Kit",
                 "$599",
                 "Smart monitoring system with mobile app integration. Track your energy production, consumption, and savings in real-time. Easy installation with wireless connectivity.",
-                "HOT"
-        );
+                "HOT");
 
         // Find product card views by their IDs
         CardView cardProduct1 = findViewById(R.id.cardProduct1);
@@ -209,15 +210,14 @@ public class HomeActivity extends AppCompatActivity {
         try {
             // Create and configure the dialog
             Dialog dialog = new Dialog(this);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);  // Remove title bar
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // Remove title bar
             dialog.setContentView(R.layout.activity_dialog_product_details); // Set our custom layout
 
             // Make dialog full width and transparent background
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setLayout(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                );
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
                 dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             }
 
@@ -258,8 +258,7 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(
                             this,
                             "Installation request sent for " + product.name + " ",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                            Toast.LENGTH_SHORT).show();
 
                     // Close the dialog
                     dialog.dismiss();
@@ -280,8 +279,7 @@ public class HomeActivity extends AppCompatActivity {
             Toast.makeText(
                     this,
                     "Error showing product details: " + e.getMessage(),
-                    Toast.LENGTH_LONG
-            ).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 

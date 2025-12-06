@@ -1,6 +1,5 @@
 package com.example.daam;
 
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,14 +27,17 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.views.MapView;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.compass.CompassOverlay;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import android.location.Location;
-
-
+import androidx.annotation.NonNull;
 
 public class activity_stores extends AppCompatActivity {
     // UI Elements
@@ -45,11 +47,11 @@ public class activity_stores extends AppCompatActivity {
     private TextView txtLatitude, txtLongitude;
     private ImageView btnCloseLocation;
 
-
-
     private FrameLayout mapLayout;
     private ScrollView productsLayout;
     private MapView mapView;
+    private MyLocationNewOverlay locationOverlay;
+    private static final int REQUEST_PERMISSIONS = 1;
 
     // Product data class (same as HomeActivity)
     public static class Product {
@@ -79,11 +81,10 @@ public class activity_stores extends AppCompatActivity {
         txtLongitude = findViewById(R.id.txtLongitude);
         btnCloseLocation = findViewById(R.id.btnCloseLocation);
 
-// ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
+        // ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
 
-// ✅ Close button logic
+        // ✅ Close button logic
         btnCloseLocation.setOnClickListener(v -> cardLocation.setVisibility(View.GONE));
-
 
         // ✅ Initialize Location Card Views
         cardLocation = findViewById(R.id.cardLocation);
@@ -91,11 +92,10 @@ public class activity_stores extends AppCompatActivity {
         txtLongitude = findViewById(R.id.txtLongitude);
         btnCloseLocation = findViewById(R.id.btnCloseLocation);
 
-// ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
+        // ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
 
-// ✅ Close button logic
+        // ✅ Close button logic
         btnCloseLocation.setOnClickListener(v -> cardLocation.setVisibility(View.GONE));
-
 
         // Set user agent value, required for OSM
         Configuration.getInstance().setUserAgentValue(getApplicationContext().getPackageName());
@@ -107,16 +107,23 @@ public class activity_stores extends AppCompatActivity {
         mapView.setBuiltInZoomControls(true);
         mapView.setMultiTouchControls(true);
 
-        // Set default zoom and center
+        // Set default zoom
         mapView.getController().setZoom(15.0);
-        GeoPoint startPoint = new GeoPoint(48.8583, 2.2944); // Example: Eiffel Tower
-        mapView.getController().setCenter(startPoint);
 
-        // Add a marker
-        Marker marker = new Marker(mapView);
-        marker.setPosition(startPoint);
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        mapView.getOverlays().add(marker);
+        // Add compass overlay
+        CompassOverlay compassOverlay = new CompassOverlay(this, mapView);
+        compassOverlay.enableCompass();
+        mapView.getOverlays().add(compassOverlay);
+
+        // Add scale bar overlay
+        ScaleBarOverlay scaleBarOverlay = new ScaleBarOverlay(mapView);
+        mapView.getOverlays().add(scaleBarOverlay);
+
+        // Request location permissions
+        requestPermissionsIfNecessary(new String[] {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        });
 
         // Setup toggle buttons
         setupToggleButtons();
@@ -144,6 +151,48 @@ public class activity_stores extends AppCompatActivity {
         }
     }
 
+    private void setupMyLocation() {
+        locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
+        locationOverlay.enableMyLocation();
+        locationOverlay.enableFollowLocation();
+        mapView.getOverlays().add(locationOverlay);
+
+        locationOverlay.runOnFirstFix(() -> {
+            GeoPoint myPoint = locationOverlay.getMyLocation();
+            if (myPoint != null) {
+                runOnUiThread(() -> {
+                    mapView.getController().setCenter(myPoint);
+                    txtLatitude.setText(String.format("Latitude: %.5f", myPoint.getLatitude()));
+                    txtLongitude.setText(String.format("Longitude: %.5f", myPoint.getLongitude()));
+                    cardLocation.setVisibility(View.VISIBLE);
+                });
+            }
+        });
+    }
+
+    private void requestPermissionsIfNecessary(String[] permissions) {
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
+                return;
+            }
+        }
+        setupMyLocation();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupMyLocation();
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -153,7 +202,7 @@ public class activity_stores extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();  // Needed for compass, my location overlays, v6.0.0 and up
+        mapView.onPause(); // Needed for compass, my location overlays, v6.0.0 and up
     }
 
     private void initializeViews() {
@@ -191,7 +240,6 @@ public class activity_stores extends AppCompatActivity {
         btnProducts.setTextColor(ContextCompat.getColor(this, R.color.gray_text));
     }
 
-
     private void showProductsSection() {
         // Show products, hide map
         mapLayout.setVisibility(View.GONE);
@@ -212,32 +260,28 @@ public class activity_stores extends AppCompatActivity {
                 "Solar Panel Kit",
                 "$2,499",
                 "High efficiency solar panel kit with advanced monocrystalline technology. Perfect for residential installations with maximum energy production capacity. Includes mounting hardware and 25-year warranty.",
-                "NEW"
-        );
+                "NEW");
 
         Product product2 = new Product(
                 R.drawable.solar_roof,
                 "Inverter System",
                 "$1,299",
                 "Professional grade 3000W inverter system with smart monitoring capabilities. Converts DC to AC power efficiently with built-in surge protection and real-time performance tracking.",
-                "-20%"
-        );
+                "-20%");
 
         Product product3 = new Product(
                 R.drawable.solar_roof,
                 "Battery Storage",
                 "$3,999",
                 "Advanced 10kWh lithium-ion battery storage system. Store excess solar energy for nighttime use. Includes smart management system and 10-year warranty.",
-                null
-        );
+                null);
 
         Product product4 = new Product(
                 R.drawable.solar_roof,
                 "Monitoring Kit",
                 "$599",
                 "Smart monitoring system with mobile app integration. Track your energy production, consumption, and savings in real-time. Easy installation with wireless connectivity.",
-                "HOT"
-        );
+                "HOT");
 
         // Find product cards
         CardView cardProduct1 = findViewById(R.id.cardStoreProduct1);
@@ -272,8 +316,7 @@ public class activity_stores extends AppCompatActivity {
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setLayout(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                );
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
                 dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             }
 
@@ -313,8 +356,7 @@ public class activity_stores extends AppCompatActivity {
                     Toast.makeText(
                             this,
                             "Installation request sent for " + product.name + " ",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                            Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 });
             }
@@ -326,8 +368,7 @@ public class activity_stores extends AppCompatActivity {
             Toast.makeText(
                     this,
                     "Error showing product details: " + e.getMessage(),
-                    Toast.LENGTH_LONG
-            ).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 }

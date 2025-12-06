@@ -12,6 +12,10 @@
             android:icon="@drawable/ic_stores"
             android:title="Stores" />
         <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/ic_home"
+            android:title="Map" />
+        <item
             android:id="@+id/nav_messages"
             android:icon="@drawable/ic_message"
             android:title="Messages" />
