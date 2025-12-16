@@ -12,7 +12,20 @@
           "package_name": "com.example.daam"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "226417206955-7q28p3ujoq8vljn1pg3cpmj1tocbjn1r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.daam",
+            "certificate_hash": "91b468e0efc77de563e3085359216bf36d75f1aa"
+          }
+        },
+        {
+          "client_id": "226417206955-9rqrp6a0i089l2jqmv68pcnmudca2ids.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCC_EMh59Bt8QWtX3DArHYKP8kvAiwQGTc"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "226417206955-9rqrp6a0i089l2jqmv68pcnmudca2ids.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

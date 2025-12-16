@@ -3,5 +3,7 @@
     <string name="client_id">226417206955-9rqrp6a0i089l2jqmv68pcnmudca2ids.apps.googleusercontent.com</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <!-- This will be auto-generated from google-services.json after Firebase setup -->
+    <string name="default_web_client_id" translatable="false">226417206955-9rqrp6a0i089l2jqmv68pcnmudca2ids.apps.googleusercontent.com</string>
 
 </resources>

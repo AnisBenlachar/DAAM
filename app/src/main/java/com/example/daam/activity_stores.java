@@ -31,6 +31,10 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.Polyline;
+import org.osmdroid.bonuspack.routing.OSRMRoadManager;
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import android.Manifest;
@@ -38,6 +42,11 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import android.location.Location;
 import androidx.annotation.NonNull;
+import android.os.AsyncTask;
+import android.graphics.Color;
+import java.util.ArrayList;
+import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 
 public class activity_stores extends AppCompatActivity {
     // UI Elements
@@ -52,6 +61,11 @@ public class activity_stores extends AppCompatActivity {
     private MapView mapView;
     private MyLocationNewOverlay locationOverlay;
     private static final int REQUEST_PERMISSIONS = 1;
+
+    // Routing fields
+    private RoadManager roadManager;
+    private Polyline roadOverlay;
+    private Marker destinationMarker;
 
     // Product data class (same as HomeActivity)
     public static class Product {
@@ -118,6 +132,12 @@ public class activity_stores extends AppCompatActivity {
         // Add scale bar overlay
         ScaleBarOverlay scaleBarOverlay = new ScaleBarOverlay(mapView);
         mapView.getOverlays().add(scaleBarOverlay);
+
+        // Initialize routing manager
+        roadManager = new OSRMRoadManager(this, "DAAM");
+
+        // Setup map click listener for destination selection
+        setupMapClickListener();
 
         // Request location permissions
         requestPermissionsIfNecessary(new String[] {
@@ -370,5 +390,116 @@ public class activity_stores extends AppCompatActivity {
                     "Error showing product details: " + e.getMessage(),
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    // ============================================
+    // ROUTING METHODS
+    // ============================================
+
+    private void setupMapClickListener() {
+        mapView.setOnClickListener(v -> {
+            // This won't work, we need to use MapEventsOverlay
+        });
+
+        // Add a simple tap listener using existing overlays
+        org.osmdroid.views.overlay.MapEventsOverlay mapEventsOverlay = new org.osmdroid.views.overlay.MapEventsOverlay(
+                new org.osmdroid.events.MapEventsReceiver() {
+                    @Override
+                    public boolean singleTapConfirmedHelper(GeoPoint p) {
+                        onMapTapped(p);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean longPressHelper(GeoPoint p) {
+                        return false;
+                    }
+                });
+        mapView.getOverlays().add(0, mapEventsOverlay);
+    }
+
+    private void onMapTapped(GeoPoint destination) {
+        // Check if we have user location
+        if (locationOverlay == null || locationOverlay.getMyLocation() == null) {
+            Toast.makeText(this, "Waiting for GPS location...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Set destination marker
+        if (destinationMarker != null) {
+            mapView.getOverlays().remove(destinationMarker);
+        }
+
+        destinationMarker = new Marker(mapView);
+        destinationMarker.setPosition(destination);
+        destinationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        destinationMarker.setTitle("Destination");
+        mapView.getOverlays().add(destinationMarker);
+        mapView.invalidate();
+
+        // Calculate route
+        calculateRoute(destination);
+    }
+
+    private void calculateRoute(GeoPoint destination) {
+        GeoPoint startPoint = locationOverlay.getMyLocation();
+        if (startPoint == null) {
+            Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show loading message
+        Toast.makeText(this, "Calculating route...", Toast.LENGTH_SHORT).show();
+
+        // Calculate route in background thread
+        new Thread(() -> {
+            ArrayList<GeoPoint> waypoints = new ArrayList<>();
+            waypoints.add(startPoint);
+            waypoints.add(destination);
+
+            Road road = roadManager.getRoad(waypoints);
+
+            runOnUiThread(() -> {
+                if (road.mStatus == Road.STATUS_OK) {
+                    drawRoute(road);
+
+                    // Show route info
+                    double distance = road.mLength; // in km
+                    double duration = road.mDuration / 60.0; // convert to minutes
+                    String info = String.format("Route: %.1f km, ~%.0f min", distance, duration);
+                    Toast.makeText(this, info, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Route calculation failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }).start();
+    }
+
+    private void drawRoute(Road road) {
+        // Remove old route if exists
+        if (roadOverlay != null) {
+            mapView.getOverlays().remove(roadOverlay);
+        }
+
+        // Create new route overlay
+        roadOverlay = new Polyline();
+        roadOverlay.setPoints(road.mRouteHigh);
+        roadOverlay.setColor(Color.parseColor("#4285F4")); // Google Maps blue
+        roadOverlay.setWidth(10f);
+
+        mapView.getOverlays().add(roadOverlay);
+        mapView.invalidate();
+    }
+
+    private void clearRoute() {
+        if (roadOverlay != null) {
+            mapView.getOverlays().remove(roadOverlay);
+            roadOverlay = null;
+        }
+        if (destinationMarker != null) {
+            mapView.getOverlays().remove(destinationMarker);
+            destinationMarker = null;
+        }
+        mapView.invalidate();
     }
 }
