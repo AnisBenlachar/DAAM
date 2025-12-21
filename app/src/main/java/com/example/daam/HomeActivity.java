@@ -128,6 +128,14 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(HomeActivity.this, "Map selected", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(HomeActivity.this, MapActivity.class);
                 startActivity(intent);
+            } else if (id == R.id.nav_logout) {
+                // Logout functionality
+                com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
+                Toast.makeText(HomeActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             // Close the drawer

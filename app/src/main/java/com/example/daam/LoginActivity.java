@@ -119,8 +119,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        // Sign out first to force account picker to show
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+            // Now start the sign-in intent
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
     }
 
     @Override
@@ -190,10 +194,13 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Check if user is already signed in
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            navigateToHome();
-        }
+        // Auto-login disabled - user must explicitly log in
+        // This prevents bypassing the login screen
+        /*
+         * FirebaseUser currentUser = mAuth.getCurrentUser();
+         * if (currentUser != null) {
+         * navigateToHome();
+         * }
+         */
     }
 }

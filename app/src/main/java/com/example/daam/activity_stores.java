@@ -160,6 +160,14 @@ public class activity_stores extends AppCompatActivity {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
                 startActivity(new Intent(activity_stores.this, HomeActivity.class));
+            } else if (id == R.id.nav_logout) {
+                // Logout functionality
+                com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
+                Toast.makeText(activity_stores.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(activity_stores.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
