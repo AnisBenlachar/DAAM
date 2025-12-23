@@ -4,10 +4,14 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +36,14 @@ public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
+
+    // Search and Buttons
+    private EditText etSearch;
+    private CardView cardSystemStatus, cardFindWorkers;
+
+    // Product Cards & Data (Class fields for search filtering)
+    private CardView cardProduct1, cardProduct2, cardProduct3, cardProduct4;
+    private Product product1, product2, product3, product4;
 
     // ============================================
     // STEP 2: Product Data Class
@@ -76,6 +88,71 @@ public class HomeActivity extends AppCompatActivity {
         setupProductCards();
 
         setupMenuIconListener();
+
+        // Setup Search and Buttons
+        setupSearch();
+        setupHomeButtons();
+    }
+
+    private void setupSearch() {
+        etSearch = findViewById(R.id.etSearch);
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterProducts(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+    }
+
+    private void setupHomeButtons() {
+        cardSystemStatus = findViewById(R.id.cardSystemStatus);
+        cardFindWorkers = findViewById(R.id.cardFindWorkers);
+
+        if (cardSystemStatus != null) {
+            cardSystemStatus.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, activity_stores.class);
+                intent.putExtra("INITIAL_VIEW", "PRODUCTS");
+                startActivity(intent);
+            });
+        }
+
+        if (cardFindWorkers != null) {
+            cardFindWorkers.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, activity_stores.class);
+                intent.putExtra("INITIAL_VIEW", "MAP");
+                startActivity(intent);
+            });
+        }
+    }
+
+    private void filterProducts(String query) {
+        String lowerQuery = query.toLowerCase();
+
+        // Helper to check and set visibility
+        checkAndSetVisibility(cardProduct1, product1, lowerQuery);
+        checkAndSetVisibility(cardProduct2, product2, lowerQuery);
+        checkAndSetVisibility(cardProduct3, product3, lowerQuery);
+        checkAndSetVisibility(cardProduct4, product4, lowerQuery);
+    }
+
+    private void checkAndSetVisibility(CardView card, Product product, String query) {
+        if (card == null || product == null)
+            return;
+
+        if (product.name.toLowerCase().contains(query) ||
+                product.desc.toLowerCase().contains(query)) {
+            card.setVisibility(View.VISIBLE);
+        } else {
+            card.setVisibility(View.GONE);
+        }
     }
 
     // ============================================
@@ -158,21 +235,21 @@ public class HomeActivity extends AppCompatActivity {
     // ============================================
     private void setupProductCards() {
         // Create product objects with data
-        Product product1 = new Product(
+        product1 = new Product(
                 R.drawable.solar_roof,
                 "Solar Panel Kit",
                 "$2,499",
                 "High efficiency solar panel kit with advanced monocrystalline technology. Perfect for residential installations with maximum energy production capacity. Includes mounting hardware and 25-year warranty.",
                 "NEW");
 
-        Product product2 = new Product(
+        product2 = new Product(
                 R.drawable.solar_roof,
                 "Inverter System",
                 "$1,299",
                 "Professional grade 3000W inverter system with smart monitoring capabilities. Converts DC to AC power efficiently with built-in surge protection and real-time performance tracking.",
                 "-20%");
 
-        Product product3 = new Product(
+        product3 = new Product(
                 R.drawable.solar_roof,
                 "Battery Storage",
                 "$3,999",
@@ -180,7 +257,7 @@ public class HomeActivity extends AppCompatActivity {
                 null // No badge
         );
 
-        Product product4 = new Product(
+        product4 = new Product(
                 R.drawable.solar_roof,
                 "Monitoring Kit",
                 "$599",
@@ -188,10 +265,10 @@ public class HomeActivity extends AppCompatActivity {
                 "HOT");
 
         // Find product card views by their IDs
-        CardView cardProduct1 = findViewById(R.id.cardProduct1);
-        CardView cardProduct2 = findViewById(R.id.cardProduct2);
-        CardView cardProduct3 = findViewById(R.id.cardProduct3);
-        CardView cardProduct4 = findViewById(R.id.cardProduct4);
+        cardProduct1 = findViewById(R.id.cardProduct1);
+        cardProduct2 = findViewById(R.id.cardProduct2);
+        cardProduct3 = findViewById(R.id.cardProduct3);
+        cardProduct4 = findViewById(R.id.cardProduct4);
 
         // Set click listeners - when clicked, show dialog with product data
         if (cardProduct1 != null) {
@@ -262,19 +339,14 @@ public class HomeActivity extends AppCompatActivity {
             // Request Installation button
             if (btnAddToCart != null) {
                 btnAddToCart.setOnClickListener(v -> {
-                    // Show confirmation message
-                    Toast.makeText(
-                            this,
-                            "Installation request sent for " + product.name + " ",
-                            Toast.LENGTH_SHORT).show();
+                    // Start Request Installation Activity
+                    Intent intent = new Intent(HomeActivity.this, RequestInstallationActivity.class);
+                    intent.putExtra("PRODUCT_NAME", product.name);
+                    intent.putExtra("PRODUCT_PRICE", product.price);
+                    startActivity(intent);
 
                     // Close the dialog
                     dialog.dismiss();
-
-                    // TODO: Add your custom logic here:
-                    // - Navigate to installation form
-                    // - Send request to server
-                    // - Save to database, etc.
                 });
             }
 

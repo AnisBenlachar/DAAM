@@ -117,6 +117,14 @@ public class activity_stores extends AppCompatActivity {
         // Initialize views
         initializeViews();
 
+        // Check intent for initial view
+        String initialView = getIntent().getStringExtra("INITIAL_VIEW");
+        if ("MAP".equals(initialView)) {
+            showMapSection();
+        } else {
+            showProductsSection();
+        }
+
         mapView = findViewById(R.id.mapView);
         mapView.setBuiltInZoomControls(true);
         mapView.setMultiTouchControls(true);
@@ -381,10 +389,11 @@ public class activity_stores extends AppCompatActivity {
             // Request Installation button
             if (btnAddToCart != null) {
                 btnAddToCart.setOnClickListener(v -> {
-                    Toast.makeText(
-                            this,
-                            "Installation request sent for " + product.name + " ",
-                            Toast.LENGTH_SHORT).show();
+                    // Start Request Installation Activity
+                    Intent intent = new Intent(activity_stores.this, RequestInstallationActivity.class);
+                    intent.putExtra("PRODUCT_NAME", product.name);
+                    intent.putExtra("PRODUCT_PRICE", product.price);
+                    startActivity(intent);
                     dialog.dismiss();
                 });
             }

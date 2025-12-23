@@ -137,6 +137,7 @@
                     android:weightSum="2">
 
                     <androidx.cardview.widget.CardView
+                        android:id="@+id/cardSystemStatus"
                         android:layout_width="0dp"
                         android:layout_height="140dp"
                         android:layout_marginEnd="10dp"
@@ -180,6 +181,7 @@
                     </androidx.cardview.widget.CardView>
 
                     <androidx.cardview.widget.CardView
+                        android:id="@+id/cardFindWorkers"
                         android:layout_width="0dp"
                         android:layout_height="140dp"
                         android:layout_marginStart="10dp"
