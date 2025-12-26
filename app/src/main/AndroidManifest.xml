@@ -18,6 +18,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DAAM">
 
+        <!-- Worker Activities -->
+        <activity
+            android:name=".worker.WorkerHomeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".worker.WorkerRequestsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".worker.WorkerJobDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".worker.WorkerProfileActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".worker.WorkerCompletedJobsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".RequestInstallationActivity"
             android:exported="false"

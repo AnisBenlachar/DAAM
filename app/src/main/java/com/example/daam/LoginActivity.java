@@ -32,6 +32,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button buttonLogin;
     private Button buttonGoogle;
     private EditText editTextEmail, editTextPassword;
+    private TextView btnRoleClient, btnRoleWorker;
+    private boolean isWorker = false;
 
     // Firebase Auth
     private FirebaseAuth mAuth;
@@ -55,6 +57,11 @@ public class LoginActivity extends AppCompatActivity {
         buttonGoogle = findViewById(R.id.buttonGoogle);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
+
+        btnRoleClient = findViewById(R.id.btnRoleClient);
+        btnRoleWorker = findViewById(R.id.btnRoleWorker);
+
+        setupRoleSelection();
 
         // Configure Google Sign-In
         configureGoogleSignIn();
@@ -106,6 +113,42 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void setupRoleSelection() {
+        btnRoleClient.setOnClickListener(v -> {
+            isWorker = false;
+            updateRoleUI();
+        });
+
+        btnRoleWorker.setOnClickListener(v -> {
+            isWorker = true;
+            updateRoleUI();
+        });
+    }
+
+    private void updateRoleUI() {
+        if (isWorker) {
+            btnRoleWorker.setBackgroundResource(R.drawable.toggle_button_selected);
+            btnRoleWorker.setTextColor(getResources().getColor(android.R.color.white));
+
+            btnRoleClient.setBackgroundResource(android.R.color.transparent);
+            btnRoleClient.setTextColor(getResources().getColor(R.color.gray_text)); // Assuming a gray color logic or
+                                                                                    // hardcoded
+        } else {
+            btnRoleClient.setBackgroundResource(R.drawable.toggle_button_selected);
+            btnRoleClient.setTextColor(getResources().getColor(android.R.color.white));
+
+            btnRoleWorker.setBackgroundResource(android.R.color.transparent);
+            btnRoleWorker.setTextColor(getResources().getColor(R.color.gray_text));
+        }
+
+        // Use hardcoded colors if resource not found to be safe, but ideally defining
+        // them in colors.xml
+        if (!isWorker)
+            btnRoleWorker.setTextColor(0xFF757575);
+        else
+            btnRoleClient.setTextColor(0xFF757575);
     }
 
     private void configureGoogleSignIn() {
@@ -186,7 +229,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        Intent intent;
+        if (isWorker) {
+            // Navigate to Worker Home (Fully qualified name to avoid import issues yet)
+            intent = new Intent(LoginActivity.this, com.example.daam.worker.WorkerHomeActivity.class);
+        } else {
+            // Navigate to Client Home
+            intent = new Intent(LoginActivity.this, HomeActivity.class);
+        }
         startActivity(intent);
         finish();
     }

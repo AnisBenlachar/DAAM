@@ -37,7 +37,42 @@
             android:text="Sign in to continue"
             android:textSize="16sp"
             android:textColor="#757575"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="16dp" />
+
+        <!-- Role Selector Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:background="@drawable/rounded_input"
+            android:layout_marginBottom="24dp"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/btnRoleClient"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Client"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/toggle_button_selected" />
+
+            <TextView
+                android:id="@+id/btnRoleWorker"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Worker"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#757575"
+                android:background="@android:color/transparent" />
+
+        </LinearLayout>
 
         <!-- Email Input Card -->
         <androidx.cardview.widget.CardView
