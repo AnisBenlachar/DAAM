@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="model">
+
+    <!-- ===================================================== -->
+    <!--  ABSTRACT USER CLASS (table-per-concrete-class)       -->
+    <!-- ===================================================== -->
+    <class name="User" table="users" abstract="true">
+
+        <id name="id" type="long" column="id">
+            <generator class="increment"/>
+        </id>
+
+        <property name="firstName"   column="first_name"   type="string"/>
+        <property name="lastName"    column="last_name"    type="string"/>
+        <property name="email"       column="email"        type="string" unique="true"/>
+        <property name="password"    column="password"     type="string"/>
+        <property name="birthDate"   column="birth_date"   type="date"/>
+        <property name="phoneNumber" column="phone_number" type="string"/>
+        <property name="deleted"     column="deleted"      type="string"/>&
+
+        <!-- ===================================================== -->
+        <!--  CLIENT UNION SUBCLASS                                -->
+        <!-- ===================================================== -->
+        <union-subclass name="Client" table="client">
+
+            <component name="rLocation" class="Location">
+                <property name="latitude"  column="latitude" />
+                <property name="longitude" column="longitude" />
+                <property name="street"    column="street"/>
+                <property name="city"      column="city"/>
+                <property name="zipCode"   column="zip_code"/>
+                <property name="country"   column="country"/>
+                <property name="deleted"   column="location_deleted"/>
+            </component>
+
+        </union-subclass>
+
+        <!-- ===================================================== -->
+        <!--  ADMIN UNION SUBCLASS                                 -->
+        <!-- ===================================================== -->
+        <union-subclass name="Admin" table="admin"/>
+
+        <!-- ===================================================== -->
+        <!--  WORKER UNION SUBCLASS                                -->
+        <!-- ===================================================== -->
+        <union-subclass name="Worker" table="worker"/>
+
+        <!-- ===================================================== -->
+        <!--  SELLER UNION SUBCLASS                                -->
+        <!-- ===================================================== -->
+        <union-subclass name="Seller" table="seller"/>
+
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="model.ProductItem" table="product_item">
+
+        <composite-id>
+            <key-property name="productSerial" column="product_serial" type="string"/>
+        </composite-id>
+
+        <property name="price" column="price" type="double"/>
+
+        <many-to-one name="product"
+                     class="model.Product"
+                     column="product_serial"
+                     insert="false" update="false"/>
+
+    </class>
+
+</hibernate-mapping>

@@ -67,46 +67,19 @@ public class activity_stores extends AppCompatActivity {
     private Polyline roadOverlay;
     private Marker destinationMarker;
 
-    // Product data class (same as HomeActivity)
-    public static class Product {
-        public int imageResource;
-        public String name;
-        public String price;
-        public String desc;
-        public String badge;
-
-        public Product(int imageResource, String name, String price, String desc, String badge) {
-            this.imageResource = imageResource;
-            this.name = name;
-            this.price = price;
-            this.desc = desc;
-            this.badge = badge;
-        }
-    }
+    private androidx.recyclerview.widget.RecyclerView rvProducts;
+    private com.example.daam.adapter.ProductAdapter productAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stores);
-        setContentView(R.layout.activity_stores);
-        // ✅ Initialize Location Card Views
-        cardLocation = findViewById(R.id.cardLocation);
-        txtLatitude = findViewById(R.id.txtLatitude);
-        txtLongitude = findViewById(R.id.txtLongitude);
-        btnCloseLocation = findViewById(R.id.btnCloseLocation);
-
-        // ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
-
-        // ✅ Close button logic
-        btnCloseLocation.setOnClickListener(v -> cardLocation.setVisibility(View.GONE));
 
         // ✅ Initialize Location Card Views
         cardLocation = findViewById(R.id.cardLocation);
         txtLatitude = findViewById(R.id.txtLatitude);
         txtLongitude = findViewById(R.id.txtLongitude);
         btnCloseLocation = findViewById(R.id.btnCloseLocation);
-
-        // ✅ TEMP TEST VALUES (YOU WILL REPLACE WITH REAL GPS LATER)
 
         // ✅ Close button logic
         btnCloseLocation.setOnClickListener(v -> cardLocation.setVisibility(View.GONE));
@@ -116,6 +89,9 @@ public class activity_stores extends AppCompatActivity {
 
         // Initialize views
         initializeViews();
+
+        rvProducts = findViewById(R.id.rvProducts);
+        rvProducts.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 2));
 
         // Check intent for initial view
         String initialView = getIntent().getStringExtra("INITIAL_VIEW");
@@ -156,8 +132,8 @@ public class activity_stores extends AppCompatActivity {
         // Setup toggle buttons
         setupToggleButtons();
 
-        // Setup product cards
-        setupProductCards();
+        // Fetch products from backend
+        fetchProducts();
 
         // Initialize drawer layout and navigation view
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -169,7 +145,8 @@ public class activity_stores extends AppCompatActivity {
             if (id == R.id.nav_home) {
                 startActivity(new Intent(activity_stores.this, HomeActivity.class));
             } else if (id == R.id.nav_logout) {
-                // Logout functionality
+                // Clear prefs
+                getSharedPreferences("UserPrefs", MODE_PRIVATE).edit().clear().apply();
                 com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
                 Toast.makeText(activity_stores.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(activity_stores.this, LoginActivity.class);
@@ -187,163 +164,42 @@ public class activity_stores extends AppCompatActivity {
         }
     }
 
-    private void setupMyLocation() {
-        locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
-        locationOverlay.enableMyLocation();
-        locationOverlay.enableFollowLocation();
-        mapView.getOverlays().add(locationOverlay);
+    private void fetchProducts() {
+        android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String token = prefs.getString("token", null);
 
-        locationOverlay.runOnFirstFix(() -> {
-            GeoPoint myPoint = locationOverlay.getMyLocation();
-            if (myPoint != null) {
-                runOnUiThread(() -> {
-                    mapView.getController().setCenter(myPoint);
-                    txtLatitude.setText(String.format("Latitude: %.5f", myPoint.getLatitude()));
-                    txtLongitude.setText(String.format("Longitude: %.5f", myPoint.getLongitude()));
-                    cardLocation.setVisibility(View.VISIBLE);
-                });
-            }
-        });
-    }
+        if (token != null) {
+            com.example.daam.api.RetrofitClient.getInstance().getApi().getProducts("Bearer " + token)
+                    .enqueue(new retrofit2.Callback<java.util.List<com.example.daam.model.Product>>() {
+                        @Override
+                        public void onResponse(retrofit2.Call<java.util.List<com.example.daam.model.Product>> call,
+                                retrofit2.Response<java.util.List<com.example.daam.model.Product>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                java.util.List<com.example.daam.model.Product> products = response.body();
+                                productAdapter = new com.example.daam.adapter.ProductAdapter(products,
+                                        product -> showProductDialog(product));
+                                rvProducts.setAdapter(productAdapter);
+                            } else {
+                                Toast.makeText(activity_stores.this, "Failed to load products: " + response.code(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-    private void requestPermissionsIfNecessary(String[] permissions) {
-        for (String permission : permissions) {
-            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
-                return;
-            }
+                        @Override
+                        public void onFailure(retrofit2.Call<java.util.List<com.example.daam.model.Product>> call,
+                                Throwable t) {
+                            Toast.makeText(activity_stores.this, "Error fetching products: " + t.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
-        setupMyLocation();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSIONS) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupMyLocation();
-            } else {
-                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume(); // Needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause(); // Needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    private void initializeViews() {
-        btnMap = findViewById(R.id.btnMap);
-        btnProducts = findViewById(R.id.btnProducts);
-        mapLayout = findViewById(R.id.mapLayout);
-        productsLayout = findViewById(R.id.productsLayout);
-    }
-
-    private void setupToggleButtons() {
-        // Map button click
-        btnMap.setOnClickListener(v -> {
-            showMapSection();
-        });
-
-        // Products button click
-        btnProducts.setOnClickListener(v -> {
-            showProductsSection();
-        });
-    }
-
-    private void showMapSection() {
-        // Show map, hide products
-        mapLayout.setVisibility(View.VISIBLE);
-        productsLayout.setVisibility(View.GONE);
-
-        // ✅ SHOW LOCATION CARD AGAIN WHEN MAP OPENS
-        cardLocation.setVisibility(View.VISIBLE);
-
-        // Update button styles
-        btnMap.setBackgroundResource(R.drawable.toggle_button_selected);
-        btnMap.setTextColor(ContextCompat.getColor(this, android.R.color.white));
-
-        btnProducts.setBackgroundResource(R.drawable.toggle_button_unselected);
-        btnProducts.setTextColor(ContextCompat.getColor(this, R.color.gray_text));
-    }
-
-    private void showProductsSection() {
-        // Show products, hide map
-        mapLayout.setVisibility(View.GONE);
-        productsLayout.setVisibility(View.VISIBLE);
-
-        // Update button styles
-        btnProducts.setBackgroundResource(R.drawable.toggle_button_selected);
-        btnProducts.setTextColor(ContextCompat.getColor(this, android.R.color.white));
-
-        btnMap.setBackgroundResource(R.drawable.toggle_button_unselected);
-        btnMap.setTextColor(ContextCompat.getColor(this, R.color.gray_text));
     }
 
     private void setupProductCards() {
-        // Create product data
-        Product product1 = new Product(
-                R.drawable.solar_roof,
-                "Solar Panel Kit",
-                "$2,499",
-                "High efficiency solar panel kit with advanced monocrystalline technology. Perfect for residential installations with maximum energy production capacity. Includes mounting hardware and 25-year warranty.",
-                "NEW");
-
-        Product product2 = new Product(
-                R.drawable.solar_roof,
-                "Inverter System",
-                "$1,299",
-                "Professional grade 3000W inverter system with smart monitoring capabilities. Converts DC to AC power efficiently with built-in surge protection and real-time performance tracking.",
-                "-20%");
-
-        Product product3 = new Product(
-                R.drawable.solar_roof,
-                "Battery Storage",
-                "$3,999",
-                "Advanced 10kWh lithium-ion battery storage system. Store excess solar energy for nighttime use. Includes smart management system and 10-year warranty.",
-                null);
-
-        Product product4 = new Product(
-                R.drawable.solar_roof,
-                "Monitoring Kit",
-                "$599",
-                "Smart monitoring system with mobile app integration. Track your energy production, consumption, and savings in real-time. Easy installation with wireless connectivity.",
-                "HOT");
-
-        // Find product cards
-        CardView cardProduct1 = findViewById(R.id.cardStoreProduct1);
-        CardView cardProduct2 = findViewById(R.id.cardStoreProduct2);
-        CardView cardProduct3 = findViewById(R.id.cardStoreProduct3);
-        CardView cardProduct4 = findViewById(R.id.cardStoreProduct4);
-
-        // Set click listeners
-        if (cardProduct1 != null) {
-            cardProduct1.setOnClickListener(v -> showProductDialog(product1));
-        }
-
-        if (cardProduct2 != null) {
-            cardProduct2.setOnClickListener(v -> showProductDialog(product2));
-        }
-
-        if (cardProduct3 != null) {
-            cardProduct3.setOnClickListener(v -> showProductDialog(product3));
-        }
-
-        if (cardProduct4 != null) {
-            cardProduct4.setOnClickListener(v -> showProductDialog(product4));
-        }
+        // Not used anymore as we use RecyclerView
     }
 
-    private void showProductDialog(Product product) {
+    private void showProductDialog(com.example.daam.model.Product product) {
         try {
             Dialog dialog = new Dialog(this);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -366,19 +222,19 @@ public class activity_stores extends AppCompatActivity {
 
             // Set product data
             if (ivDialogImage != null) {
-                ivDialogImage.setImageResource(product.imageResource);
+                ivDialogImage.setImageResource(R.drawable.solar_roof);
             }
 
             if (tvDialogName != null) {
-                tvDialogName.setText(product.name);
+                tvDialogName.setText(product.getName());
             }
 
             if (tvDialogPrice != null) {
-                tvDialogPrice.setText(product.price);
+                tvDialogPrice.setText("$" + product.getBasePrice());
             }
 
             if (tvDialogDesc != null) {
-                tvDialogDesc.setText(product.desc);
+                tvDialogDesc.setText(product.getDescription());
             }
 
             // Close button
@@ -391,8 +247,8 @@ public class activity_stores extends AppCompatActivity {
                 btnAddToCart.setOnClickListener(v -> {
                     // Start Request Installation Activity
                     Intent intent = new Intent(activity_stores.this, RequestInstallationActivity.class);
-                    intent.putExtra("PRODUCT_NAME", product.name);
-                    intent.putExtra("PRODUCT_PRICE", product.price);
+                    intent.putExtra("PRODUCT_NAME", product.getName());
+                    intent.putExtra("PRODUCT_PRICE", "$" + product.getBasePrice());
                     startActivity(intent);
                     dialog.dismiss();
                 });
@@ -506,6 +362,118 @@ public class activity_stores extends AppCompatActivity {
 
         mapView.getOverlays().add(roadOverlay);
         mapView.invalidate();
+    }
+
+    private void initializeViews() {
+        btnMap = findViewById(R.id.btnMap);
+        btnProducts = findViewById(R.id.btnProducts);
+        mapLayout = findViewById(R.id.mapLayout);
+        productsLayout = findViewById(R.id.productsLayout);
+    }
+
+    private void setupToggleButtons() {
+        if (btnMap != null) {
+            btnMap.setOnClickListener(v -> showMapSection());
+        }
+        if (btnProducts != null) {
+            btnProducts.setOnClickListener(v -> showProductsSection());
+        }
+    }
+
+    private void showMapSection() {
+        if (mapLayout != null)
+            mapLayout.setVisibility(View.VISIBLE);
+        if (productsLayout != null)
+            productsLayout.setVisibility(View.GONE);
+        if (btnMap != null) {
+            btnMap.setBackgroundResource(R.drawable.toggle_button_selected);
+            btnMap.setTextColor(Color.WHITE);
+        }
+        if (btnProducts != null) {
+            btnProducts.setBackgroundResource(R.drawable.toggle_button_unselected);
+            btnProducts.setTextColor(Color.parseColor("#757575"));
+        }
+    }
+
+    private void showProductsSection() {
+        if (mapLayout != null)
+            mapLayout.setVisibility(View.GONE);
+        if (productsLayout != null)
+            productsLayout.setVisibility(View.VISIBLE);
+        if (btnMap != null) {
+            btnMap.setBackgroundResource(R.drawable.toggle_button_unselected);
+            btnMap.setTextColor(Color.parseColor("#757575"));
+        }
+        if (btnProducts != null) {
+            btnProducts.setBackgroundResource(R.drawable.toggle_button_selected);
+            btnProducts.setTextColor(Color.WHITE);
+        }
+    }
+
+    private void requestPermissionsIfNecessary(String[] permissions) {
+        ArrayList<String> permissionsToRequest = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(permission);
+            }
+        }
+        if (permissionsToRequest.size() > 0) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    permissionsToRequest.toArray(new String[0]),
+                    REQUEST_PERMISSIONS);
+        } else {
+            setupMyLocation();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupMyLocation();
+            } else {
+                Toast.makeText(this, "Location permissions denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void setupMyLocation() {
+        locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
+        locationOverlay.enableMyLocation();
+        locationOverlay.enableFollowLocation();
+        mapView.getOverlays().add(locationOverlay);
+
+        locationOverlay.runOnFirstFix(() -> {
+            GeoPoint myPoint = locationOverlay.getMyLocation();
+            if (myPoint != null) {
+                runOnUiThread(() -> {
+                    mapView.getController().animateTo(myPoint);
+                    if (txtLatitude != null)
+                        txtLatitude.setText("Latitude: " + String.format("%.5f", myPoint.getLatitude()));
+                    if (txtLongitude != null)
+                        txtLongitude.setText("Longitude: " + String.format("%.5f", myPoint.getLongitude()));
+                    if (cardLocation != null)
+                        cardLocation.setVisibility(View.VISIBLE);
+                });
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mapView != null)
+            mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mapView != null)
+            mapView.onPause();
     }
 
     private void clearRoute() {

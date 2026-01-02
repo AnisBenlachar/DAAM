@@ -22,6 +22,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.example.daam.adapter.ProductAdapter;
+import com.example.daam.api.RetrofitClient;
+import com.example.daam.model.Product;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -41,29 +50,9 @@ public class HomeActivity extends AppCompatActivity {
     private EditText etSearch;
     private CardView cardSystemStatus, cardFindWorkers;
 
-    // Product Cards & Data (Class fields for search filtering)
-    private CardView cardProduct1, cardProduct2, cardProduct3, cardProduct4;
-    private Product product1, product2, product3, product4;
-
-    // ============================================
-    // STEP 2: Product Data Class
-    // ============================================
-    // This class holds information about each product
-    public static class Product {
-        public int imageResource; // Image drawable ID
-        public String name; // Product name
-        public String price; // Product price
-        public String desc; // Product description
-        public String badge; // Badge text (NEW, HOT, etc.) or null
-
-        public Product(int imageResource, String name, String price, String desc, String badge) {
-            this.imageResource = imageResource;
-            this.name = name;
-            this.price = price;
-            this.desc = desc;
-            this.badge = badge;
-        }
-    }
+    private RecyclerView rvHomeProducts;
+    private ProductAdapter productAdapter;
+    private List<Product> allProducts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,9 +74,12 @@ public class HomeActivity extends AppCompatActivity {
         // ============================================
         // STEP 3B: Initialize product cards
         // ============================================
-        setupProductCards();
+        rvHomeProducts = findViewById(R.id.rvHomeProducts);
+        rvHomeProducts.setLayoutManager(new GridLayoutManager(this, 2));
 
         setupMenuIconListener();
+
+        fetchProducts();
 
         // Setup Search and Buttons
         setupSearch();
@@ -134,24 +126,46 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void filterProducts(String query) {
-        String lowerQuery = query.toLowerCase();
-
-        // Helper to check and set visibility
-        checkAndSetVisibility(cardProduct1, product1, lowerQuery);
-        checkAndSetVisibility(cardProduct2, product2, lowerQuery);
-        checkAndSetVisibility(cardProduct3, product3, lowerQuery);
-        checkAndSetVisibility(cardProduct4, product4, lowerQuery);
-    }
-
-    private void checkAndSetVisibility(CardView card, Product product, String query) {
-        if (card == null || product == null)
+        if (allProducts == null)
             return;
 
-        if (product.name.toLowerCase().contains(query) ||
-                product.desc.toLowerCase().contains(query)) {
-            card.setVisibility(View.VISIBLE);
-        } else {
-            card.setVisibility(View.GONE);
+        String lowerQuery = query.toLowerCase();
+        java.util.ArrayList<Product> filteredList = new java.util.ArrayList<>();
+
+        for (Product product : allProducts) {
+            if (product.getName().toLowerCase().contains(lowerQuery) ||
+                    product.getDescription().toLowerCase().contains(lowerQuery)) {
+                filteredList.add(product);
+            }
+        }
+
+        productAdapter = new ProductAdapter(filteredList, product -> showProductDialog(product));
+        rvHomeProducts.setAdapter(productAdapter);
+    }
+
+    private void fetchProducts() {
+        android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String token = prefs.getString("token", null);
+
+        if (token != null) {
+            RetrofitClient.getInstance().getApi().getProducts("Bearer " + token)
+                    .enqueue(new Callback<List<Product>>() {
+                        @Override
+                        public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                allProducts = response.body();
+                                productAdapter = new ProductAdapter(allProducts, product -> showProductDialog(product));
+                                rvHomeProducts.setAdapter(productAdapter);
+                            } else {
+                                Toast.makeText(HomeActivity.this, "Failed to load products", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Product>> call, Throwable t) {
+                            Toast.makeText(HomeActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
     }
 
@@ -234,58 +248,7 @@ public class HomeActivity extends AppCompatActivity {
     // STEP 4: Setup Product Cards Method
     // ============================================
     private void setupProductCards() {
-        // Create product objects with data
-        product1 = new Product(
-                R.drawable.solar_roof,
-                "Solar Panel Kit",
-                "$2,499",
-                "High efficiency solar panel kit with advanced monocrystalline technology. Perfect for residential installations with maximum energy production capacity. Includes mounting hardware and 25-year warranty.",
-                "NEW");
-
-        product2 = new Product(
-                R.drawable.solar_roof,
-                "Inverter System",
-                "$1,299",
-                "Professional grade 3000W inverter system with smart monitoring capabilities. Converts DC to AC power efficiently with built-in surge protection and real-time performance tracking.",
-                "-20%");
-
-        product3 = new Product(
-                R.drawable.solar_roof,
-                "Battery Storage",
-                "$3,999",
-                "Advanced 10kWh lithium-ion battery storage system. Store excess solar energy for nighttime use. Includes smart management system and 10-year warranty.",
-                null // No badge
-        );
-
-        product4 = new Product(
-                R.drawable.solar_roof,
-                "Monitoring Kit",
-                "$599",
-                "Smart monitoring system with mobile app integration. Track your energy production, consumption, and savings in real-time. Easy installation with wireless connectivity.",
-                "HOT");
-
-        // Find product card views by their IDs
-        cardProduct1 = findViewById(R.id.cardProduct1);
-        cardProduct2 = findViewById(R.id.cardProduct2);
-        cardProduct3 = findViewById(R.id.cardProduct3);
-        cardProduct4 = findViewById(R.id.cardProduct4);
-
-        // Set click listeners - when clicked, show dialog with product data
-        if (cardProduct1 != null) {
-            cardProduct1.setOnClickListener(v -> showProductDialog(product1));
-        }
-
-        if (cardProduct2 != null) {
-            cardProduct2.setOnClickListener(v -> showProductDialog(product2));
-        }
-
-        if (cardProduct3 != null) {
-            cardProduct3.setOnClickListener(v -> showProductDialog(product3));
-        }
-
-        if (cardProduct4 != null) {
-            cardProduct4.setOnClickListener(v -> showProductDialog(product4));
-        }
+        // Obsolete
     }
 
     // ============================================
@@ -316,19 +279,19 @@ public class HomeActivity extends AppCompatActivity {
 
             // Set product data to dialog views
             if (ivDialogImage != null) {
-                ivDialogImage.setImageResource(product.imageResource);
+                ivDialogImage.setImageResource(R.drawable.solar_roof);
             }
 
             if (tvDialogName != null) {
-                tvDialogName.setText(product.name);
+                tvDialogName.setText(product.getName());
             }
 
             if (tvDialogPrice != null) {
-                tvDialogPrice.setText(product.price);
+                tvDialogPrice.setText("$" + product.getBasePrice());
             }
 
             if (tvDialogDesc != null) {
-                tvDialogDesc.setText(product.desc);
+                tvDialogDesc.setText(product.getDescription());
             }
 
             // Close button - dismisses the dialog
@@ -341,8 +304,8 @@ public class HomeActivity extends AppCompatActivity {
                 btnAddToCart.setOnClickListener(v -> {
                     // Start Request Installation Activity
                     Intent intent = new Intent(HomeActivity.this, RequestInstallationActivity.class);
-                    intent.putExtra("PRODUCT_NAME", product.name);
-                    intent.putExtra("PRODUCT_PRICE", product.price);
+                    intent.putExtra("PRODUCT_NAME", product.getName());
+                    intent.putExtra("PRODUCT_PRICE", "$" + product.getBasePrice());
                     startActivity(intent);
 
                     // Close the dialog

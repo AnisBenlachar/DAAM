@@ -210,20 +210,73 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInWithEmailPassword(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+        // Use Custom Backend for Login
+        com.example.daam.model.LoginRequest loginRequest = new com.example.daam.model.LoginRequest(email, password);
+        com.example.daam.api.RetrofitClient.getInstance().getApi().login(loginRequest)
+                .enqueue(new retrofit2.Callback<com.example.daam.model.LoginResponse>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign-in success
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(LoginActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
-                            navigateToHome();
+                    public void onResponse(retrofit2.Call<com.example.daam.model.LoginResponse> call,
+                            retrofit2.Response<com.example.daam.model.LoginResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            com.example.daam.model.LoginResponse loginResponse = response.body();
+                            com.example.daam.model.UserDTO user = loginResponse.getUser();
+                            String userRole = user.getRole();
+
+                            // Enforce Role Selection
+                            boolean isWorkerRole = "WORKER".equalsIgnoreCase(userRole);
+                            if (isWorker && !isWorkerRole) {
+                                Toast.makeText(LoginActivity.this,
+                                        "Login Failed: This account is not a Worker account.", Toast.LENGTH_LONG)
+                                        .show();
+                                return;
+                            }
+                            if (!isWorker && isWorkerRole) {
+                                Toast.makeText(LoginActivity.this,
+                                        "Login Failed: This account is a Worker account. Please switch to Worker login.",
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+
+                            // If role matches, proceed
+                            String token = loginResponse.getToken();
+
+                            // Save to SharedPreferences
+                            android.content.SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                            android.content.SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("token", token);
+                            editor.putString("email", user.getEmail());
+                            editor.putString("firstName", user.getFirstName());
+                            editor.putString("lastName", user.getLastName());
+                            editor.putString("role", userRole);
+                            editor.apply();
+
+                            Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+
+                            if (isWorkerRole) {
+                                Intent intent = new Intent(LoginActivity.this,
+                                        com.example.daam.worker.WorkerHomeActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                // Default to Client home or generic home
+                                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+
                         } else {
-                            // Sign-in failed
-                            Toast.makeText(LoginActivity.this, "Login failed: " + task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Login Failed: " + response.code(), Toast.LENGTH_SHORT)
+                                    .show();
                         }
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<com.example.daam.model.LoginResponse> call, Throwable t) {
+                        // Fallback or just show error. For now, showing error.
+                        // You could keep Firebase here as a fallback if needed, but per requirements,
+                        // we are connecting to Spring Boot.
+                        Toast.makeText(LoginActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                                .show();
                     }
                 });
     }
@@ -231,10 +284,8 @@ public class LoginActivity extends AppCompatActivity {
     private void navigateToHome() {
         Intent intent;
         if (isWorker) {
-            // Navigate to Worker Home (Fully qualified name to avoid import issues yet)
             intent = new Intent(LoginActivity.this, com.example.daam.worker.WorkerHomeActivity.class);
         } else {
-            // Navigate to Client Home
             intent = new Intent(LoginActivity.this, HomeActivity.class);
         }
         startActivity(intent);

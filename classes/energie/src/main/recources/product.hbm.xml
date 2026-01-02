@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="model.Product" table="product">
+
+        <id name="serialNumber" type="string" column="serial_number">
+        </id>
+
+        <property name="name" column="name" type="string"/>
+        <property name="description" column="description" type="string"/>
+
+        <!-- Many-to-one relation to Seller -->
+        <many-to-one name="seller"
+                     class="model.Seller"
+                     column="seller_email"
+                     not-null="false"
+                     cascade="none"/>
+
+        <!-- One-to-many relation to ProductItem -->
+        <set name="items" table="product_item" inverse="true" cascade="all">
+            <key column="product_serial"/>
+            <one-to-many class="model.ProductItem"/>
+        </set>
+
+    </class>
+
+</hibernate-mapping>

@@ -183,17 +183,23 @@
 
                 </LinearLayout>
 
-                <!-- Action Button -->
-                <Button
-                    android:id="@+id/btnViewRequests"
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Your Tasks"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#212121"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvWorkerTasks"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="32dp"
-                    android:text="View All Requests"
-                    android:textAllCaps="false"
-                    android:textSize="16sp"
-                    android:backgroundTint="#008080"
-                    app:cornerRadius="8dp" />
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/>
 
             </LinearLayout>
         </ScrollView>

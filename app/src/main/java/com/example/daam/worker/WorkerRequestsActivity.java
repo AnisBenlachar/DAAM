@@ -18,7 +18,15 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.daam.LoginActivity;
 import com.example.daam.R;
 import com.google.android.material.navigation.NavigationView;
+import com.example.daam.api.RetrofitClient;
+import com.example.daam.model.Task;
+import com.example.daam.model.UpdateTaskStatusRequest;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import android.content.SharedPreferences;
 import com.google.firebase.auth.FirebaseAuth;
+import java.util.List;
 
 public class WorkerRequestsActivity extends AppCompatActivity {
 
@@ -34,17 +42,42 @@ public class WorkerRequestsActivity extends AppCompatActivity {
         setupNavigationDrawer();
 
         requestsContainer = findViewById(R.id.requestsContainer);
-        loadDummyWrapper();
+        fetchRequests();
     }
 
-    private void loadDummyWrapper() {
-        // Add some dummy requests
-        addRequestCard("John Doe", "Solar Panel Kit - Premium", "123 Solar Blvd, Sun City");
-        addRequestCard("Jane Smith", "Inverter System 3000W", "45 Energy Lane, Power Town");
-        addRequestCard("Robert Brown", "Battery Storage 10kWh", "789 Green St, Eco Village");
+    private void fetchRequests() {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String token = prefs.getString("token", null);
+        String email = prefs.getString("email", null);
+
+        if (token != null && email != null) {
+            RetrofitClient.getInstance().getApi().getWorkerTasks(email, "Bearer " + token)
+                    .enqueue(new Callback<List<Task>>() {
+                        @Override
+                        public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                requestsContainer.removeAllViews();
+                                for (Task task : response.body()) {
+                                    if ("PENDING".equals(task.getStatus())) {
+                                        addRequestCard(task);
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(WorkerRequestsActivity.this, "Failed to load requests",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Task>> call, Throwable t) {
+                            Toast.makeText(WorkerRequestsActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    });
+        }
     }
 
-    private void addRequestCard(String name, String product, String address) {
+    private void addRequestCard(Task task) {
         View cardView = LayoutInflater.from(this).inflate(R.layout.item_worker_request, requestsContainer, false);
 
         TextView tvName = cardView.findViewById(R.id.tvClientName);
@@ -53,25 +86,44 @@ public class WorkerRequestsActivity extends AppCompatActivity {
         Button btnAccept = cardView.findViewById(R.id.btnAccept);
         Button btnReject = cardView.findViewById(R.id.btnReject);
 
-        tvName.setText(name);
-        tvProduct.setText(product);
-        tvAddress.setText(address);
+        tvName.setText(task.getClientName() != null ? task.getClientName() : task.getClientEmail());
+        tvProduct.setText(task.getDescription());
+        tvAddress.setText("Installation Request");
 
-        btnAccept.setOnClickListener(v -> {
-            // Navigate to Job Detail
-            Intent intent = new Intent(WorkerRequestsActivity.this, WorkerJobDetailActivity.class);
-            intent.putExtra("CLIENT_NAME", name);
-            intent.putExtra("PRODUCT_NAME", product);
-            intent.putExtra("CLIENT_ADDRESS", address);
-            startActivity(intent);
-        });
+        btnAccept.setOnClickListener(v -> updateTaskStatus(task.getId(), "CONFIRMED", cardView));
 
-        btnReject.setOnClickListener(v -> {
-            requestsContainer.removeView(cardView);
-            Toast.makeText(this, "Request Rejected", Toast.LENGTH_SHORT).show();
-        });
+        btnReject.setOnClickListener(v -> updateTaskStatus(task.getId(), "CANCELLED", cardView));
 
         requestsContainer.addView(cardView);
+    }
+
+    private void updateTaskStatus(Long taskId, String status, View cardView) {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String token = prefs.getString("token", null);
+
+        if (token != null) {
+            UpdateTaskStatusRequest request = new UpdateTaskStatusRequest(status);
+            RetrofitClient.getInstance().getApi().updateTaskStatus(taskId, request, "Bearer " + token)
+                    .enqueue(new Callback<Task>() {
+                        @Override
+                        public void onResponse(Call<Task> call, Response<Task> response) {
+                            if (response.isSuccessful()) {
+                                requestsContainer.removeView(cardView);
+                                Toast.makeText(WorkerRequestsActivity.this, "Task " + status, Toast.LENGTH_SHORT)
+                                        .show();
+                            } else {
+                                Toast.makeText(WorkerRequestsActivity.this, "Failed to update status",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Task> call, Throwable t) {
+                            Toast.makeText(WorkerRequestsActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    });
+        }
     }
 
     private void setupNavigationDrawer() {
@@ -94,6 +146,8 @@ public class WorkerRequestsActivity extends AppCompatActivity {
                 Intent intent = new Intent(WorkerRequestsActivity.this, WorkerProfileActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_worker_logout) {
+                // Clear prefs
+                getSharedPreferences("UserPrefs", MODE_PRIVATE).edit().clear().apply();
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(WorkerRequestsActivity.this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

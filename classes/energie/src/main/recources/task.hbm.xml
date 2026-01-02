@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="model.Task" table="task">
+
+        <id name="id" type="long" column="id">
+            <generator class="increment"/>
+        </id>
+
+        <property name="description" column="description" type="string"/>
+        <property name="status" column="status" type="string"/>
+        <property name="createdAt" column="created_at" type="date"/>
+        <property name="confirmedAt" column="confirmed_at" type="date"/>
+        <property name="achievedAt" column="achieved_at" type="date"/>
+
+        <many-to-one name="client"
+                     class="model.Client"
+                     column="client_email"
+                     not-null="false"/>
+
+        <many-to-one name="worker"
+                     class="model.Worker"
+                     column="worker_email"
+                     not-null="false"/>
+
+    </class>
+
+</hibernate-mapping>
