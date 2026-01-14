@@ -21,4 +21,6 @@ public class TaskDTO {
     private String clientName;
     private String workerEmail;
     private String workerName;
+    private Long productId;
+    private String productName;
 }

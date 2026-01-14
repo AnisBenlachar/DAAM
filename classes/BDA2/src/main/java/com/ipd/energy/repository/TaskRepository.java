@@ -20,6 +20,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findByStatus(TaskStatus status);
 
+    @Query("SELECT t FROM Task t WHERE t.status = 'PENDING'")
+    List<Task> findAllPendingTasks();
+
     @Query("SELECT t FROM Task t ORDER BY t.createdAt DESC")
     List<Task> findAllOrderByCreatedAtDesc();
 }

@@ -68,6 +68,7 @@ public class WorkerService {
                 worker.getFirstName(),
                 worker.getLastName(),
                 worker.getPhoneNumber(),
-                worker.getRole());
+                worker.getRole(),
+                worker.getRating());
     }
 }

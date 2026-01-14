@@ -2,6 +2,7 @@ package com.ipd.energy.controller;
 
 import com.ipd.energy.dto.TaskDTO;
 import com.ipd.energy.dto.UpdateTaskStatusRequest;
+import com.ipd.energy.entity.Task;
 import com.ipd.energy.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,17 @@ public class TaskController {
     public ResponseEntity<List<TaskDTO>> getAllTasks() {
         List<TaskDTO> tasks = taskService.getAllTasks();
         return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WORKER')")
+    public ResponseEntity<List<TaskDTO>> getAllPendingTasks() {
+        try {
+            List<TaskDTO> tasks = taskService.getAllPendingTasks();
+            return ResponseEntity.ok(tasks);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @GetMapping("/worker/{email}")
@@ -74,12 +86,38 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'WORKER')")
     public ResponseEntity<TaskDTO> updateTaskStatus(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateTaskStatusRequest request) {
+            @Valid @RequestBody UpdateTaskStatusRequest request,
+            Authentication authentication) {
         try {
-            TaskDTO updatedTask = taskService.updateTaskStatus(id, request.getStatus());
+            String workerEmail = null;
+            // If it's a worker, we might want to automatically assign them if they are
+            // accepting it
+            // but the DTO doesn't have workerEmail yet. Let's see if we should add it to
+            // UpdateTaskStatusRequest
+            // or use authentication principal.
+
+            // For now, let's assume if status is CONFIRMED and it's a WORKER, they are
+            // accepting it.
+            if (request.getStatus() == Task.TaskStatus.CONFIRMED) {
+                workerEmail = (String) authentication.getPrincipal();
+            }
+
+            TaskDTO updatedTask = taskService.updateTaskStatus(id, request.getStatus(), workerEmail);
             return ResponseEntity.ok(updatedTask);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
+    public ResponseEntity<TaskDTO> createTask(@Valid @RequestBody TaskDTO taskDTO) {
+        try {
+            TaskDTO createdTask = taskService.createTask(taskDTO);
+            return ResponseEntity.ok(createdTask);
+        } catch (Exception e) {
+            System.err.println("REST ERROR in createTask: " + e.getMessage());
+            return ResponseEntity.status(500).build();
         }
     }
 }

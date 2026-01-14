@@ -202,9 +202,9 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(HomeActivity.this, "Home selected", Toast.LENGTH_SHORT).show();
                 // Handle home click - already on home, so just close drawer
 
-            } else if (id == R.id.nav_messages) {
-                Toast.makeText(HomeActivity.this, "Messages selected", Toast.LENGTH_SHORT).show();
-                // TODO: Navigate to Messages activity/fragment
+            } else if (id == R.id.nav_activity_log) {
+                Intent intent = new Intent(HomeActivity.this, ClientTasksActivity.class);
+                startActivity(intent);
             } else if (id == R.id.nav_settings) {
                 Toast.makeText(HomeActivity.this, "Settings selected", Toast.LENGTH_SHORT).show();
                 // TODO: Navigate to Settings activity/fragment
@@ -215,9 +215,9 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(HomeActivity.this, "Stores selected", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(HomeActivity.this, activity_stores.class);
                 startActivity(intent);
-            } else if (id == R.id.nav_map) {
-                Toast.makeText(HomeActivity.this, "Map selected", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(HomeActivity.this, MapActivity.class);
+            } else if (id == R.id.nav_workers) {
+                Toast.makeText(HomeActivity.this, "Workers selected", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(HomeActivity.this, WorkersActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_logout) {
                 // Logout functionality

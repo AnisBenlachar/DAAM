@@ -42,6 +42,22 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".WorkersActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SelectProductActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".HireSubmissionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ClientTasksActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".RequestInstallationActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

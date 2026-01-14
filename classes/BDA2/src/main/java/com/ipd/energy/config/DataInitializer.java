@@ -23,6 +23,9 @@ public class DataInitializer implements CommandLineRunner {
     private TaskRepository taskRepository;
 
     @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -57,6 +60,7 @@ public class DataInitializer implements CommandLineRunner {
         worker1.setBirthDate(LocalDate.of(1990, 5, 15));
         worker1.setPhoneNumber("+1234567891");
         worker1.setRole("WORKER");
+        worker1.setRating(4.5);
         workerRepository.save(worker1);
         System.out.println("Created worker user: worker@solarhub.com / worker123");
 
@@ -68,6 +72,7 @@ public class DataInitializer implements CommandLineRunner {
         worker2.setBirthDate(LocalDate.of(1988, 8, 20));
         worker2.setPhoneNumber("+1234567892");
         worker2.setRole("WORKER");
+        worker2.setRating(4.8);
         workerRepository.save(worker2);
         System.out.println("Created worker user: worker2@solarhub.com / worker123");
 
@@ -105,6 +110,15 @@ public class DataInitializer implements CommandLineRunner {
         userRepository.save(seller);
         System.out.println("Created seller user: seller@solarhub.com / seller123");
 
+        // Create sample products
+        Product solarPanel = new Product();
+        solarPanel.setName("Premium Solar Panel");
+        solarPanel.setDescription("High-efficiency monocrystalline solar panel");
+        solarPanel.setCategory("Panels");
+        solarPanel.setBasePrice(new java.math.BigDecimal("299.99"));
+        solarPanel.setUnit("panel");
+        productRepository.save(solarPanel);
+
         // Create sample tasks
         Task task1 = new Task();
         task1.setDescription("Install solar panels on residential roof");
@@ -112,6 +126,7 @@ public class DataInitializer implements CommandLineRunner {
         task1.setCreatedAt(LocalDateTime.now().minusDays(5));
         task1.setClient(client);
         task1.setWorker(worker1);
+        task1.setProduct(solarPanel);
         taskRepository.save(task1);
 
         Task task2 = new Task();

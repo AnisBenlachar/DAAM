@@ -76,6 +76,7 @@ public class ClientService {
                 client.getFirstName(),
                 client.getLastName(),
                 client.getPhoneNumber(),
-                client.getRole());
+                client.getRole(),
+                null);
     }
 }

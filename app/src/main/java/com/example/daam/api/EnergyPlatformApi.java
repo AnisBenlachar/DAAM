@@ -1,9 +1,11 @@
 package com.example.daam.api;
 
+import com.example.daam.model.CreateTaskRequest;
+import com.example.daam.model.Product;
+import com.example.daam.model.UpdateTaskStatusRequest;
 import com.example.daam.model.LoginRequest;
 import com.example.daam.model.LoginResponse;
 import com.example.daam.model.Task;
-
 import java.util.List;
 
 import retrofit2.Call;
@@ -22,12 +24,21 @@ public interface EnergyPlatformApi {
     @GET("tasks/worker/{email}")
     Call<List<Task>> getWorkerTasks(@Path("email") String email, @Header("Authorization") String token);
 
+    @GET("tasks/client/{email}")
+    Call<List<Task>> getTasksByClient(@Path("email") String email, @Header("Authorization") String token);
+
     @GET("products")
-    Call<List<com.example.daam.model.Product>> getProducts(@Header("Authorization") String token);
+    Call<List<Product>> getProducts(@Header("Authorization") String token);
+
+    @GET("workers")
+    Call<List<com.example.daam.model.UserDTO>> getWorkers(@Header("Authorization") String token);
 
     @PUT("tasks/{id}/status")
     Call<Task> updateTaskStatus(
             @Path("id") Long id,
-            @Body com.example.daam.model.UpdateTaskStatusRequest request,
+            @Body UpdateTaskStatusRequest request,
             @Header("Authorization") String token);
+
+    @POST("tasks")
+    Call<Task> createTask(@Body CreateTaskRequest request, @Header("Authorization") String token);
 }

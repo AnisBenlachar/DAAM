@@ -1,6 +1,9 @@
 package com.example.daam.model;
 
 public class Task {
+    public Task() {
+    }
+
     private Long id; // Added ID as it is likely needed, though not explicitly in the partial backend
                      // file shared
     private String description;
@@ -12,6 +15,8 @@ public class Task {
     private String createdAt;
     private String confirmedAt;
     private String achievedAt;
+    private Long productId;
+    private String productName;
 
     public Long getId() {
         return id;
@@ -43,6 +48,14 @@ public class Task {
 
     public String getCreatedAt() {
         return createdAt;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public String getProductName() {
+        return productName;
     }
 
 }

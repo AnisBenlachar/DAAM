@@ -9,6 +9,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.example.daam.api.RetrofitClient;
+import com.example.daam.model.CreateTaskRequest;
+import com.example.daam.model.Task;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import android.content.SharedPreferences;
 
 public class RequestInstallationActivity extends AppCompatActivity {
 
@@ -73,12 +80,44 @@ public class RequestInstallationActivity extends AppCompatActivity {
             return;
         }
 
-        // Simulate submission
-        // Here you would typically send this data to a server or save to a database
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String token = prefs.getString("token", null);
+        String clientEmail = prefs.getString("email", null);
 
-        Toast.makeText(this, "Installation request sent successfully!", Toast.LENGTH_LONG).show();
+        if (token == null || clientEmail == null) {
+            Toast.makeText(this, "Session expired, please login again", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Return to previous screen
-        finish();
+        String description = "Installation for: " + tvProductName.getText().toString() +
+                "\nClient: " + name +
+                "\nPhone: " + phone +
+                "\nAddress: " + address;
+
+        CreateTaskRequest request = new CreateTaskRequest(description, clientEmail, "PENDING", null, null);
+
+        btnSubmitRequest.setEnabled(false);
+        RetrofitClient.getInstance().getApi().createTask(request, "Bearer " + token)
+                .enqueue(new Callback<Task>() {
+                    @Override
+                    public void onResponse(Call<Task> call, Response<Task> response) {
+                        btnSubmitRequest.setEnabled(true);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(RequestInstallationActivity.this, "Installation request sent successfully!",
+                                    Toast.LENGTH_LONG).show();
+                            finish();
+                        } else {
+                            Toast.makeText(RequestInstallationActivity.this,
+                                    "Failed to send request: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Task> call, Throwable t) {
+                        btnSubmitRequest.setEnabled(true);
+                        Toast.makeText(RequestInstallationActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                });
     }
 }

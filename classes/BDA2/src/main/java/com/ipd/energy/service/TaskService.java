@@ -1,9 +1,15 @@
 package com.ipd.energy.service;
 
 import com.ipd.energy.dto.TaskDTO;
+import com.ipd.energy.entity.Product;
 import com.ipd.energy.entity.Task;
 import com.ipd.energy.entity.Task.TaskStatus;
+import com.ipd.energy.entity.Client;
+import com.ipd.energy.entity.Worker;
+import com.ipd.energy.repository.ClientRepository;
+import com.ipd.energy.repository.ProductRepository;
 import com.ipd.energy.repository.TaskRepository;
+import com.ipd.energy.repository.WorkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +23,15 @@ public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private WorkerRepository workerRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Transactional(readOnly = true)
     public List<TaskDTO> getAllTasks() {
@@ -58,6 +73,19 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
+    public List<TaskDTO> getAllPendingTasks() {
+        try {
+            return taskRepository.findAllPendingTasks().stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("ERROR in getAllPendingTasks: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
     public TaskDTO getTaskById(Long id) {
         try {
             Task task = taskRepository.findById(id)
@@ -71,11 +99,19 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO updateTaskStatus(Long id, TaskStatus newStatus) {
+    public TaskDTO updateTaskStatus(Long id, TaskStatus newStatus, String workerEmail) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
 
         task.setStatus(newStatus);
+
+        // If a worker email is provided (common when accepting a request), assign the
+        // worker
+        if (workerEmail != null && !workerEmail.isEmpty()) {
+            Worker worker = workerRepository.findByEmail(workerEmail)
+                    .orElseThrow(() -> new RuntimeException("Worker not found: " + workerEmail));
+            task.setWorker(worker);
+        }
 
         // Update timestamps based on status
         if (newStatus == TaskStatus.CONFIRMED && task.getConfirmedAt() == null) {
@@ -86,6 +122,35 @@ public class TaskService {
 
         Task updatedTask = taskRepository.save(task);
         return convertToDTO(updatedTask);
+    }
+
+    @Transactional
+    public TaskDTO createTask(TaskDTO taskDTO) {
+        Task task = new Task();
+        task.setDescription(taskDTO.getDescription());
+        task.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : Task.TaskStatus.PENDING);
+        task.setCreatedAt(LocalDateTime.now());
+
+        if (taskDTO.getClientEmail() != null) {
+            Client client = clientRepository.findByEmail(taskDTO.getClientEmail())
+                    .orElseThrow(() -> new RuntimeException("Client not found: " + taskDTO.getClientEmail()));
+            task.setClient(client);
+        }
+
+        if (taskDTO.getWorkerEmail() != null) {
+            Worker worker = workerRepository.findByEmail(taskDTO.getWorkerEmail())
+                    .orElseThrow(() -> new RuntimeException("Worker not found: " + taskDTO.getWorkerEmail()));
+            task.setWorker(worker);
+        }
+
+        if (taskDTO.getProductId() != null) {
+            Product product = productRepository.findById(taskDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + taskDTO.getProductId()));
+            task.setProduct(product);
+        }
+
+        Task savedTask = taskRepository.save(task);
+        return convertToDTO(savedTask);
     }
 
     private TaskDTO convertToDTO(Task task) {
@@ -105,6 +170,11 @@ public class TaskService {
         if (task.getWorker() != null) {
             dto.setWorkerEmail(task.getWorker().getEmail());
             dto.setWorkerName(task.getWorker().getFirstName() + " " + task.getWorker().getLastName());
+        }
+
+        if (task.getProduct() != null) {
+            dto.setProductId(task.getProduct().getId());
+            dto.setProductName(task.getProduct().getName());
         }
 
         return dto;

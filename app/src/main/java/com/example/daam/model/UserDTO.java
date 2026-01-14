@@ -6,13 +6,18 @@ public class UserDTO {
     private String lastName;
     private String phoneNumber;
     private String role; // "WORKER" or "CLIENT"
+    private Double rating;
 
-    public UserDTO(String email, String firstName, String lastName, String phoneNumber, String role) {
+    public UserDTO() {
+    }
+
+    public UserDTO(String email, String firstName, String lastName, String phoneNumber, String role, Double rating) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.role = role;
+        this.rating = rating;
     }
 
     public String getEmail() {
@@ -33,5 +38,9 @@ public class UserDTO {
 
     public String getRole() {
         return role;
+    }
+
+    public Double getRating() {
+        return rating;
     }
 }

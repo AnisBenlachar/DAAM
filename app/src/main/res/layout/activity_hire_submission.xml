@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FA">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="Back"
+            android:padding="4dp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Confirm Hire"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#212121"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hiring Details"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#008080"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/tvSummaryWorker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Worker: John Doe"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvSummaryProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Product: Solar Panel X1"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:layout_marginBottom="24dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description (Optional)"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="3"
+                android:gravity="top"
+                android:hint="Tell us more about the installation..."
+                android:background="@drawable/rounded_input"
+                android:padding="12dp"
+                android:layout_marginBottom="24dp"/>
+
+            <Button
+                android:id="@+id/btnSubmitHire"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Confirm and Send Request"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:backgroundTint="#008080"
+                android:textColor="@android:color/white"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

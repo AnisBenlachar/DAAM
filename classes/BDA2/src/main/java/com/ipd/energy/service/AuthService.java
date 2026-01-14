@@ -31,13 +31,13 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
-
         UserDTO userDTO = new UserDTO(
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getPhoneNumber(),
-                user.getRole());
+                user.getRole(),
+                null);
 
         return new LoginResponse(token, userDTO);
     }
@@ -51,6 +51,7 @@ public class AuthService {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getPhoneNumber(),
-                user.getRole());
+                user.getRole(),
+                null);
     }
 }

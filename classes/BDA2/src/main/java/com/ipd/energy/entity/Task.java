@@ -44,6 +44,10 @@ public class Task {
     @JoinColumn(name = "worker_email", referencedColumnName = "email")
     private Worker worker;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

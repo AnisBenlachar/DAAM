@@ -21,7 +21,7 @@ public class WorkerController {
     private WorkerService workerService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'WORKER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WORKER', 'CLIENT')")
     public ResponseEntity<List<UserDTO>> getAllWorkers() {
         List<UserDTO> workers = workerService.getAllWorkers();
         return ResponseEntity.ok(workers);
