@@ -54,6 +54,10 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".SignupActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".ClientTasksActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
@@ -84,9 +88,6 @@
             android:exported="false" />
         <activity
             android:name=".ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SignUpActivity"
             android:exported="false" />
 
         <!-- Splash screen launches first -->

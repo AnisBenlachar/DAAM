@@ -9,7 +9,8 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,7 +58,7 @@ public class activity_stores extends AppCompatActivity {
     private ImageView btnCloseLocation;
 
     private FrameLayout mapLayout;
-    private ScrollView productsLayout;
+    private android.widget.LinearLayout productsLayout;
     private MapView mapView;
     private MyLocationNewOverlay locationOverlay;
     private static final int REQUEST_PERMISSIONS = 1;

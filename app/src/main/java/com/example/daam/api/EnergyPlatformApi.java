@@ -41,4 +41,7 @@ public interface EnergyPlatformApi {
 
     @POST("tasks")
     Call<Task> createTask(@Body CreateTaskRequest request, @Header("Authorization") String token);
+
+    @POST("clients/register")
+    Call<com.example.daam.model.UserDTO> registerClient(@Body com.example.daam.model.CreateClientRequest request);
 }

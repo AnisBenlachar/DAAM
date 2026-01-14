@@ -205,55 +205,50 @@
             </FrameLayout>
 
             <!-- PRODUCTS SECTION -->
-            <ScrollView
+            <LinearLayout
                 android:id="@+id/productsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"
-                android:fillViewport="true">
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp">
 
+                <!-- Products Section Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:paddingTop="20dp"
-                    android:paddingBottom="20dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-                    <!-- Products Section Header -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="16dp">
+                        android:layout_weight="1"
+                        android:text="Available Products"
+                        android:textStyle="bold"
+                        android:textColor="#212121"
+                        android:textSize="20sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Available Products"
-                            android:textStyle="bold"
-                            android:textColor="#212121"
-                            android:textSize="20sp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="View All"
-                            android:textColor="#008080"
-                            android:textStyle="bold"
-                            android:textSize="14sp"/>
-                    </LinearLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvProducts"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"/>
+                        android:text="View All"
+                        android:textColor="#008080"
+                        android:textStyle="bold"
+                        android:textSize="14sp"/>
                 </LinearLayout>
-            </ScrollView>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvProducts"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:nestedScrollingEnabled="true"/>
+            </LinearLayout>
         </FrameLayout>
 
     </LinearLayout>

@@ -38,6 +38,7 @@ public class Product {
     private BigDecimal basePrice;
 
     @Column(name = "unit", length = 20)
+    @Column(name = "unit", length = 20)
     private String unit; // e.g., "kW", "panel", "meter"
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
